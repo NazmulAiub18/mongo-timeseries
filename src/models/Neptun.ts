@@ -4,6 +4,7 @@ const NeptunSchema = new Schema(
   {
     timestamp: { type: Date, required: true },
     metadata: {
+      measurementType: { type: String, required: true },
       deviceBaseType: { type: String, required: true },
       deviceId: { type: String, required: true },
       deviceType: { type: String, required: true },
@@ -33,6 +34,12 @@ const NeptunSchema = new Schema(
     collection: "neptun_test",
   }
 );
+
+NeptunSchema.index({
+  "metadata.deviceId": 1,
+  "metadata.measurementType": 1,
+  timestamp: -1,
+});
 
 const Neptun = model("Neptun", NeptunSchema);
 

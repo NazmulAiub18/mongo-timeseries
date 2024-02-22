@@ -12,24 +12,48 @@ import NeptunLevel from "./models/NeptunLevel";
   try {
     await mongoose.connect(process.env.MONGODB_URI);
 
-    const query = [
+    console.time("neptun");
+    const data = await Neptun.aggregate([
+      {
+        $match: {
+          "metadata.deviceId": "neptun_lora_FCA84A0200000104",
+          "metadata.measurementType": "level",
+          timestamp: {
+            $gte: new Date("2024-02-01T00:00:00.000Z"),
+            $lte: new Date("2024-02-02T00:00:00.000Z"),
+          },
+        },
+      },
+      {
+        $project: {
+          "metadata.deviceId": 1,
+          timestamp: 1,
+          level: { $divide: ["$level", 10] },
+        },
+      },
+    ]);
+    console.timeEnd("neptun");
+    console.time("neptun_level");
+    const data_level = await NeptunLevel.aggregate([
       {
         $match: {
           "metadata.deviceId": "neptun_lora_FCA84A0200000104",
           timestamp: {
-            $gte: new Date("2023-03-01T00:00:00.000Z"),
-            $lte: new Date("2023-03-03T00:00:00.000Z"),
+            $gte: new Date("2024-02-01T00:00:00.000Z"),
+            $lte: new Date("2024-02-02T00:00:00.000Z"),
           },
-          level: { $exists: true },
         },
       },
-    ];
-    console.time("neptun");
-    const data = await Neptun.aggregate(query);
-    console.timeEnd("neptun");
-    console.time("neptun_level");
-    const data_level = await NeptunLevel.aggregate(query);
+      {
+        $project: {
+          "metadata.deviceId": 1,
+          timestamp: 1,
+          level: { $divide: ["$level", 10] },
+        },
+      },
+    ]);
     console.timeEnd("neptun_level");
+
     console.log(`neptun: ${data.length}`);
     console.log(`neptun_level: ${data_level.length}`);
   } catch (error) {

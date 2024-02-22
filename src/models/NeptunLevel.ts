@@ -23,6 +23,11 @@ const NeptunLevelSchema = new Schema(
   }
 );
 
+NeptunLevelSchema.index({
+  "metadata.deviceId": 1,
+  timestamp: -1,
+});
+
 const NeptunLevel = model("NeptunLevel", NeptunLevelSchema);
 
 export default NeptunLevel;
